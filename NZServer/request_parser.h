@@ -19,7 +19,8 @@ public:
 
     enum result_type { good, bad, indeterminate };
 
-    result_type parse(request & req, const char * data, size_t length);
+    result_type parse(const char * data, size_t length);
+    request & request();
 
 private:
     int on_header_field(const char * at, size_t length);
@@ -35,7 +36,7 @@ private:
 
     result_type result_type_;
 
-    request request_;
+    struct request request_;
 
     bool last_was_value_;
 };

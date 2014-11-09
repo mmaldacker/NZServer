@@ -48,7 +48,7 @@ void server::do_accept()
        if (!ec)
        {
            BOOST_LOG_TRIVIAL(info) << "New connection at " << socket_.remote_endpoint().address().to_string();
-           connections_.emplace_back(std::move(socket_), request_handler_);
+           connections_.push_back(connection{std::move(socket_), request_handler_});
            connections_.back().start();
        }
        

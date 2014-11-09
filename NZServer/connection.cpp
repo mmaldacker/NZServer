@@ -20,7 +20,8 @@ connection::connection(boost::asio::ip::tcp::socket socket, request_handler & ha
 
 connection::connection(connection && other) : connection(std::move(other.socket_), other.request_handler_)
 {
-
+    buffer_ = std::move(other.buffer_);
+    //FIXME need to move request_parser too
 }
 
 void connection::start()
@@ -42,7 +43,8 @@ void connection::do_read()
         {
             BOOST_LOG_TRIVIAL(debug) << "Reading " << bytes_transferred << " bytes";
 
-            request_parser::result_type result = request_parser_.parse(request_, buffer_.data(), bytes_transferred);
+            request_parser::result_type result = request_parser_.parse(buffer_.data(), bytes_transferred);
+            request_ = request_parser_.request();
 
             if (result == request_parser::good)
             {
@@ -68,6 +70,8 @@ void connection::do_read()
 
 void connection::do_write()
 {
+    BOOST_LOG_TRIVIAL(info) << "Sending response";
+
     boost::asio::async_write(socket_, reply_.to_buffers(),
     [this](boost::system::error_code ec, std::size_t)
     {
@@ -82,6 +86,9 @@ void connection::do_write()
         {
             // stop
         }
+
+        BOOST_LOG_TRIVIAL(info) << "Response sent!";
+
     });
 }
 

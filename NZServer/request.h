@@ -36,10 +36,10 @@ struct request
 inline std::ostream & operator<<(std::ostream & o, const request & req)
 {
     o << "URI " << req.uri << " METHOD " << req.method << " | ";
-    for(auto && h : req.headers)
+    /*for(auto && h : req.headers)
     {
         o << h.name << "=" << h.value << " | ";
-    }
+    }*/
 
     return o;
 }

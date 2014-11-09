@@ -57,10 +57,8 @@ request_parser::request_parser() : result_type_(indeterminate), last_was_value_(
     };
 }
 
-request_parser::result_type request_parser::parse(request & req, const char * data, size_t length)
+request_parser::result_type request_parser::parse(const char * data, size_t length)
 {
-    req = request_;
-    
     auto nparsed = http_parser_execute(&parser_, &settings_, data, length);
 
     if (parser_.upgrade)
@@ -74,6 +72,11 @@ request_parser::result_type request_parser::parse(request & req, const char * da
     }
 
     return result_type_;
+}
+
+request & request_parser::request()
+{
+    return request_;
 }
 
 int request_parser::on_header_field(const char * at, size_t length)
@@ -140,5 +143,7 @@ int request_parser::on_message_complete()
 int request_parser::on_headers_complete()
 {
     request_.method = http_method_str((enum http_method)parser_.method);
+    request_.http_version_major = parser_.http_major;
+    request_.http_version_minor = parser_.http_minor;
     return 0;
 }
