@@ -14,7 +14,8 @@
 server::server(const std::string& address, const std::string& port)
     : io_service_(),
     acceptor_(io_service_),
-    socket_(io_service_)
+    socket_(io_service_),
+    request_handler_()
 {
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::resolver resolver(io_service_);

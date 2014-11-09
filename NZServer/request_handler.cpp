@@ -9,6 +9,11 @@
 #include "request_handler.h"
 #include <boost/log/trivial.hpp>
 
+request_handler::request_handler() : file_handler_("/Users/mmaldacker/NZServer"), template_handler_("/Users/mmaldacker/NZServer")
+{
+    
+}
+
 void request_handler::handle_request(const request & req, reply & rep)
 {
     BOOST_LOG_TRIVIAL(info) << "Handling request " << req.uri;

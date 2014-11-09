@@ -9,46 +9,82 @@
 #include "template.h"
 #include <fstream>
 #include <boost/log/trivial.hpp>
+#include "utils.h"
+
+template_engine::template_engine() : state_(true)
+{
+    gather_function_ = std::bind(&template_engine::gather, this, std::placeholders::_1, std::placeholders::_2);
+    state_["display"] = gather_function_;
+}
+
+std::string template_engine::generate_html(const std::string & file)
+{
+    if(templates_.find(file) == templates_.end())
+    {
+        parse_file(file);
+    }
+
+    return run_template(templates_[file]);
+}
 
 void template_engine::parse_file(const std::string &file)
 {
-    std::ifstream is(file, std::ifstream::binary);
-    if (is)
+    std::string content;
+    if(!load_file(file, content))
     {
-        // get length of file:
-        is.seekg(0, is.end);
-        long long length = is.tellg();
-        is.seekg(0, is.beg);
+        return;
+    }
 
-        std::string str;
-        str.resize(length, ' '); // reserve space
-        char* begin = &str[0];
+    template_structure & structure = templates_[file];
 
-        is.read(begin, length);
-        is.close();
+    // FIXME more solid parsing!
 
-        std::string luaCode;
-
-        std::string::size_type codeLoc = 0, varLoc = 0;
-        while(codeLoc != std::string::npos && varLoc != std::string::npos)
+    int variableCall = 0;
+    std::string::size_type loc = 0, end = 0;
+    while((loc = content.find("{", loc+2)) != std::string::npos)
+    {
+        if(content[loc+1] == '%')
         {
-            codeLoc = str.find("{%");
-            varLoc = str.find("{{");
+            variableCall++;
+            structure.blocks.push_back(content.substr(end, loc - end));
+            end = content.find("%}", loc) + 2;
+            structure.code += content.substr(loc + 2, end - loc - 4) + "\n";
+        }
+        else if(content[loc+1] == '{')
+        {
+            variableCall++;
+            structure.blocks.push_back(content.substr(end, loc - end));
+            end = content.find("}}", loc) + 2;
+            structure.code += "display(" + std::to_string(variableCall) + ", " + content.substr(loc + 2, end - loc - 4) + ")\n";
+        }
+    }
 
-            if(codeLoc < varLoc)
-            {
-                auto end = str.find("%}");
-                luaCode += str.substr(codeLoc, end);
-            }
-            else
-            {
-                auto end = str.find("}}");
-            }
+    structure.blocks.push_back(content.substr(end));
+
+    BOOST_LOG_TRIVIAL(info) << "Loaded template file " << file;
+}
+
+void template_engine::gather(int n, const std::string data)
+{
+    computed_data_[n].append(data);
+}
+
+std::string template_engine::run_template(const template_structure & structure)
+{
+    computed_data_.clear();
+    state_(structure.code.c_str());
+
+    std::string content;
+    content += structure.blocks[0];
+    for(int i = 0 ; i < structure.blocks.size() ; ++i)
+    {
+        if(computed_data_.find(i) != computed_data_.end())
+        {
+            content += computed_data_[i];
         }
 
-        BOOST_LOG_TRIVIAL(info) << "Lua code is " << luaCode;
+        content += structure.blocks[i];
     }
-    else
-    {
-    }
+
+    return content;
 }

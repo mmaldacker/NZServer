@@ -11,11 +11,17 @@
 
 #include "request.h"
 #include "reply.h"
+#include "template.h"
 
 class template_handler
 {
 public:
+    template_handler(const std::string & root);
     void handle_request(const request & req, reply & rep);
+
+private:
+    template_engine template_engine_;
+    std::string root_;
 };
 
 #endif /* defined(__NZServer__template_handler__) */

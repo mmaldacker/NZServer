@@ -17,6 +17,8 @@
 class request_handler
 {
 public:
+    request_handler();
+
     void handle_request(const request & req, reply & rep);
 
 private:

@@ -9,6 +9,12 @@
 #include "file_handler.h"
 #include <fstream>
 #include "mime_types.h"
+#include "utils.h"
+
+file_handler::file_handler(const std::string & root) : root_(root)
+{
+
+}
 
 void file_handler::handle_request(const request &req, reply &rep)
 {
@@ -20,12 +26,8 @@ void file_handler::handle_request(const request &req, reply &rep)
         return;
     }
 
-    request_path = request_path.substr(5);
-    const std::string doc_root_ = "/Users/mmaldacker/NZServer/html";
-
     // Request path must be absolute and not contain "..".
-    if (request_path.empty() || request_path[0] != '/'
-        || request_path.find("..") != std::string::npos)
+    if (request_path.empty() || request_path[0] != '/' || request_path.find("..") != std::string::npos)
     {
         rep = reply::stock_reply(reply::bad_request);
         return;
@@ -47,9 +49,8 @@ void file_handler::handle_request(const request &req, reply &rep)
     }
 
     // Open the file to send back.
-    std::string full_path = doc_root_ + request_path;
-    std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
-    if (!is)
+    std::string full_path = root_ + request_path;
+    if (!load_file(full_path, rep.content))
     {
         rep = reply::stock_reply(reply::not_found);
         return;
@@ -57,9 +58,6 @@ void file_handler::handle_request(const request &req, reply &rep)
 
     // Fill out the reply to be sent to the client.
     rep.status = reply::ok;
-    char buf[512];
-    while (is.read(buf, sizeof(buf)).gcount() > 0)
-        rep.content.append(buf, is.gcount());
     rep.headers.resize(2);
     rep.headers[0].name = "Content-Length";
     rep.headers[0].value = std::to_string(rep.content.size());

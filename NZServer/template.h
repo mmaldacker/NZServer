@@ -12,16 +12,28 @@
 #include "selene.h"
 #include <vector>
 
+struct template_structure
+{
+    std::string code;
+    std::vector<std::string> blocks;
+};
+
 class template_engine
 {
 public:
+    template_engine();
 
+    std::string generate_html(const std::string & file);
     void parse_file(const std::string & file);
-};
 
-struct template_structure
-{
-    std::vector<std::string> blocks;
+private:
+    std::string run_template(const template_structure & structure);
+    void gather(int x, const std::string data);
+    std::function<void(int,const std::string)> gather_function_;
+
+    sel::State state_;
+    std::map<std::string, template_structure> templates_;
+    std::map<int, std::string> computed_data_;
 };
 
 #endif /* defined(__NZServer__template__) */

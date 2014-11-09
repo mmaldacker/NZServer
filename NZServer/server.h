@@ -20,7 +20,7 @@ public:
     server(const server&) = delete;
     server& operator=(const server&) = delete;
 
-    explicit server(const std::string& address, const std::string& port);
+    server(const std::string& address, const std::string& port);
 
     /// Run the server's io_service loop.
     void run();
