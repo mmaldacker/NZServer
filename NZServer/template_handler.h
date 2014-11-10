@@ -11,6 +11,9 @@
 
 #include "request.h"
 #include "reply.h"
+#include "selene.h"
+#include "database.h"
+#include "articles.h"
 #include "template.h"
 
 class template_handler
@@ -20,6 +23,9 @@ public:
     void handle_request(const request & req, reply & rep);
 
 private:
+    sel::State state_;
+    database db_;
+    articles articles_;
     template_engine template_engine_;
     std::string root_;
 };

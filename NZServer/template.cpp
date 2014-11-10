@@ -11,10 +11,11 @@
 #include <boost/log/trivial.hpp>
 #include "utils.h"
 
-template_engine::template_engine() : state_(true)
+template_engine::template_engine(sel::State & state) : state_(state)
 {
-    gather_function_ = std::bind(&template_engine::gather, this, std::placeholders::_1, std::placeholders::_2);
-    state_["display"] = gather_function_;
+    using namespace std::placeholders;
+    std::function<void(int,const std::string)> gather_function = std::bind(&template_engine::gather, this, _1, _2);
+    state_["display"] = gather_function;
 }
 
 std::string template_engine::generate_html(const std::string & file)
@@ -27,6 +28,7 @@ std::string template_engine::generate_html(const std::string & file)
     return run_template(templates_[file]);
 }
 
+// FIXME reload file if it has changed!
 void template_engine::parse_file(const std::string &file)
 {
     std::string content;
@@ -45,17 +47,17 @@ void template_engine::parse_file(const std::string &file)
     {
         if(content[loc+1] == '%')
         {
-            variableCall++;
             structure.blocks.push_back(content.substr(end, loc - end));
             end = content.find("%}", loc) + 2;
             structure.code += content.substr(loc + 2, end - loc - 4) + "\n";
+            variableCall++;
         }
         else if(content[loc+1] == '{')
         {
-            variableCall++;
             structure.blocks.push_back(content.substr(end, loc - end));
             end = content.find("}}", loc) + 2;
             structure.code += "display(" + std::to_string(variableCall) + ", " + content.substr(loc + 2, end - loc - 4) + ")\n";
+            variableCall++;
         }
     }
 
@@ -72,15 +74,18 @@ void template_engine::gather(int n, const std::string data)
 std::string template_engine::run_template(const template_structure & structure)
 {
     computed_data_.clear();
-    state_(structure.code.c_str());
+    if(!state_(structure.code.c_str()))
+    {
+        BOOST_LOG_TRIVIAL(error) << "Error running template:\n" << structure.code << "Error: " << state_;
+    }
 
     std::string content;
     content += structure.blocks[0];
-    for(int i = 0 ; i < structure.blocks.size() ; ++i)
+    for(int i = 1 ; i < structure.blocks.size() ; ++i)
     {
-        if(computed_data_.find(i) != computed_data_.end())
+        if(computed_data_.find(i-1) != computed_data_.end())
         {
-            content += computed_data_[i];
+            content += computed_data_[i-1];
         }
 
         content += structure.blocks[i];

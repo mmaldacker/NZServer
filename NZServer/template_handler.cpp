@@ -7,20 +7,35 @@
 //
 
 #include "template_handler.h"
+#include <boost/algorithm/string.hpp>
 
-template_handler::template_handler(const std::string & root) : root_(root)
+template_handler::template_handler(const std::string & root)
+    : state_(true)
+    , db_(root + "/db/test.db")
+    , articles_(db_, state_)
+    , template_engine_(state_)
+    , root_(root)
 {
 
 }
 
 void template_handler::handle_request(const request & req, reply & rep)
 {
-    rep.content = template_engine_.generate_html(root_ + req.uri);
+    std::vector<std::string> keys;
+    boost::split(keys,req.uri,boost::is_any_of("/"));
+
+    assert(keys.size() > 3);
+
+    if(keys[2] == "articles")
+    {
+        state_["article_name"] = keys[3];
+        rep.content = template_engine_.generate_html(root_ + "/template/articles.tpl");
+    }
+
     rep.status = reply::ok;
     rep.headers.resize(2);
     rep.headers[0].name = "Content-Length";
     rep.headers[0].value = std::to_string(rep.content.size());
     rep.headers[1].name = "Content-Type";
     rep.headers[1].value = "text/html";
-
 }
