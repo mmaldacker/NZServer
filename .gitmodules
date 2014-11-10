@@ -1,0 +1,3 @@
+[submodule "selene"]
+	path = selene
+	url = https://github.com/RizzlaPlus/Selene.git
