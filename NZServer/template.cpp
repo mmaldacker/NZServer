@@ -9,9 +9,10 @@
 #include "template.h"
 #include <fstream>
 #include <boost/log/trivial.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include "utils.h"
 
-template_engine::template_engine(sel::State & state) : state_(state)
+template_engine::template_engine(sel::State & state, file_store & store) : state_(state), file_store_(store)
 {
     using namespace std::placeholders;
     std::function<void(int,const std::string)> gather_function = std::bind(&template_engine::gather, this, _1, _2);
@@ -31,33 +32,51 @@ std::string template_engine::generate_html(const std::string & file)
 // FIXME reload file if it has changed!
 void template_engine::parse_file(const std::string &file)
 {
+    template_structure & structure = templates_[file];
+    parse_file(file, structure);
+}
+
+void template_engine::parse_file(const std::string & file, template_structure & structure)
+{
     std::string content;
-    if(!load_file(file, content))
+    if(!file_store_.get_file("/template/" + file, content))
     {
         return;
     }
 
-    template_structure & structure = templates_[file];
+    BOOST_LOG_TRIVIAL(info) << "Loading template file " << file;
 
     // FIXME more solid parsing!
 
-    int variableCall = 0;
     std::string::size_type loc = 0, end = 0;
-    while((loc = content.find("{", loc+2)) != std::string::npos)
+    while((loc = content.find("{", loc+1)) != std::string::npos && loc != content.size() - 1)
     {
         if(content[loc+1] == '%')
         {
             structure.blocks.push_back(content.substr(end, loc - end));
             end = content.find("%}", loc) + 2;
+
             structure.code += content.substr(loc + 2, end - loc - 4) + "\n";
-            variableCall++;
+            loc = end;
         }
         else if(content[loc+1] == '{')
         {
             structure.blocks.push_back(content.substr(end, loc - end));
             end = content.find("}}", loc) + 2;
-            structure.code += "display(" + std::to_string(variableCall) + ", " + content.substr(loc + 2, end - loc - 4) + ")\n";
-            variableCall++;
+
+            structure.code += "display(" + std::to_string(structure.blocks.size()) + ", " + content.substr(loc + 2, end - loc - 4) + ")\n";
+            loc = end;
+        }
+        else if(content[loc+1] == '#')
+        {
+            structure.blocks.push_back(content.substr(end, loc - end));
+            end = content.find("#}", loc) + 2;
+
+            auto location = content.substr(loc + 2, end - loc - 4);
+            boost::trim(location);
+            parse_file(location, structure);
+
+            loc = end;
         }
     }
 
@@ -83,11 +102,7 @@ std::string template_engine::run_template(const template_structure & structure)
     content += structure.blocks[0];
     for(int i = 1 ; i < structure.blocks.size() ; ++i)
     {
-        if(computed_data_.find(i-1) != computed_data_.end())
-        {
-            content += computed_data_[i-1];
-        }
-
+        content += computed_data_[i];
         content += structure.blocks[i];
     }
 

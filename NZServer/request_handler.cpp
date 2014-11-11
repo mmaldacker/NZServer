@@ -9,7 +9,10 @@
 #include "request_handler.h"
 #include <boost/log/trivial.hpp>
 
-request_handler::request_handler() : file_handler_("/Users/mmaldacker/NZServer"), template_handler_("/Users/mmaldacker/NZServer")
+request_handler::request_handler()
+: file_store_("/Users/mmaldacker/NZServer")
+, file_handler_(file_store_)
+, template_handler_(file_store_)
 {
     
 }

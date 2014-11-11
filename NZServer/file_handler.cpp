@@ -11,7 +11,7 @@
 #include "mime_types.h"
 #include "utils.h"
 
-file_handler::file_handler(const std::string & root) : root_(root)
+file_handler::file_handler(file_store & store) : file_store_(store)
 {
 
 }
@@ -49,8 +49,7 @@ void file_handler::handle_request(const request &req, reply &rep)
     }
 
     // Open the file to send back.
-    std::string full_path = root_ + request_path;
-    if (!load_file(full_path, rep.content))
+    if (!file_store_.get_file(request_path, rep.content))
     {
         rep = reply::stock_reply(reply::not_found);
         return;

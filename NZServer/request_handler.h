@@ -13,6 +13,7 @@
 #include "reply.h"
 #include "file_handler.h"
 #include "template_handler.h"
+#include "file_service.h"
 
 class request_handler
 {
@@ -22,6 +23,7 @@ public:
     void handle_request(const request & req, reply & rep);
 
 private:
+    file_store file_store_;
     file_handler file_handler_;
     template_handler template_handler_;
 };

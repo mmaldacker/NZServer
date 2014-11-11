@@ -15,11 +15,12 @@
 #include "database.h"
 #include "articles.h"
 #include "template.h"
+#include "file_service.h"
 
 class template_handler
 {
 public:
-    template_handler(const std::string & root);
+    template_handler(file_store &);
     void handle_request(const request & req, reply & rep);
 
 private:
@@ -27,7 +28,7 @@ private:
     database db_;
     articles articles_;
     template_engine template_engine_;
-    std::string root_;
+    file_store & file_store_;
 };
 
 #endif /* defined(__NZServer__template_handler__) */

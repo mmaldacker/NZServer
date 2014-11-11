@@ -9,12 +9,12 @@
 #include "template_handler.h"
 #include <boost/algorithm/string.hpp>
 
-template_handler::template_handler(const std::string & root)
+template_handler::template_handler(file_store & store)
     : state_(true)
-    , db_(root + "/db/test.db")
+    , db_(store.get_root() + "/db/test.db")
     , articles_(db_, state_)
-    , template_engine_(state_)
-    , root_(root)
+    , template_engine_(state_, store)
+    , file_store_(store)
 {
 
 }
@@ -29,7 +29,7 @@ void template_handler::handle_request(const request & req, reply & rep)
     if(keys[2] == "articles")
     {
         state_["article_name"] = keys[3];
-        rep.content = template_engine_.generate_html(root_ + "/template/articles.tpl");
+        rep.content = template_engine_.generate_html("articles.tpl");
     }
 
     rep.status = reply::ok;

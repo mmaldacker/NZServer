@@ -11,6 +11,7 @@
 
 #include "selene.h"
 #include <vector>
+#include "file_service.h"
 
 struct template_structure
 {
@@ -21,18 +22,20 @@ struct template_structure
 class template_engine
 {
 public:
-    template_engine(sel::State & state);
+    template_engine(sel::State & state, file_store &);
 
     std::string generate_html(const std::string & file);
     void parse_file(const std::string & file);
 
 private:
+    void parse_file(const std::string & file, template_structure & structure);
     std::string run_template(const template_structure & structure);
     void gather(int x, const std::string data);
 
     sel::State & state_;
     std::map<std::string, template_structure> templates_;
     std::map<int, std::string> computed_data_;
+    file_store & file_store_;
 };
 
 #endif /* defined(__NZServer__template__) */
