@@ -29,7 +29,7 @@ void template_handler::handle_request(const request & req, reply & rep)
     if(keys[2] == "articles")
     {
         state_["article_name"] = keys[3];
-        rep.content = template_engine_.generate_html("articles.tpl");
+        rep.content = template_engine_.generate_html("articles");
     }
 
     rep.status = reply::ok;

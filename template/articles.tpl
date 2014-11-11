@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" class="no-js">
-{# head.tpl #}
+{# head #}
 <body>
 
-{% header = {title = "Articles", abstract = "Some informative texts"} %}
+{% header = {title = "Articles", abstract = "Some informative texts and tutorials"} %}
 
-{# header.tpl #}
+{# header #}
 
 {% a = articles.get(article_name) %}
 

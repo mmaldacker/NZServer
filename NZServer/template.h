@@ -17,6 +17,13 @@ struct template_structure
 {
     std::string code;
     std::vector<std::string> blocks;
+    std::string name;
+
+    void clear()
+    {
+        code.clear();
+        blocks.clear();
+    }
 };
 
 class template_engine

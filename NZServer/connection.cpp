@@ -73,7 +73,7 @@ void connection::do_write()
     BOOST_LOG_TRIVIAL(info) << "Sending response";
 
     boost::asio::async_write(socket_, reply_.to_buffers(),
-    [this](boost::system::error_code ec, std::size_t)
+    [this](boost::system::error_code ec, std::size_t bytes_transfered)
     {
         if (!ec)
         {
@@ -87,7 +87,7 @@ void connection::do_write()
             // stop
         }
 
-        BOOST_LOG_TRIVIAL(info) << "Response sent!";
+        BOOST_LOG_TRIVIAL(info) << "Sent " << bytes_transfered << " bytes";
 
     });
 }
