@@ -14,6 +14,7 @@
 #include "file_handler.h"
 #include "template_handler.h"
 #include "file_service.h"
+#include "compressor_handler.h"
 
 class request_handler
 {
@@ -26,6 +27,7 @@ private:
     file_store file_store_;
     file_handler file_handler_;
     template_handler template_handler_;
+    compressor_handler compressor_handler_;
 };
 
 #endif /* defined(__NZServer__request_handler__) */

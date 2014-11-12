@@ -36,4 +36,6 @@ void request_handler::handle_request(const request & req, reply & rep)
     {
         rep = reply::stock_reply(reply::not_found);
     }
+
+    compressor_handler_.handle_request(req, rep);
 }
