@@ -31,12 +31,13 @@ class template_engine
 public:
     template_engine(sel::State & state, file_store &);
 
-    std::string generate_html(const std::string & file);
+    std::string run_template(const std::string & file, const std::vector<std::string> & arguments);
     void parse_file(const std::string & file);
 
 private:
+    std::string run_template(const template_structure & structure, const std::vector<std::string> & arguments);
     void parse_file(const std::string & file, template_structure & structure);
-    std::string run_template(const template_structure & structure);
+
     void gather(int x, const std::string data);
 
     sel::State & state_;

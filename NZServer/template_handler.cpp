@@ -21,16 +21,15 @@ template_handler::template_handler(file_store & store)
 
 void template_handler::handle_request(const request & req, reply & rep)
 {
-    std::vector<std::string> keys;
+    std::deque<std::string> keys;
     boost::split(keys,req.uri,boost::is_any_of("/"));
+    keys.pop_front();
 
-    assert(keys.size() > 3);
+    assert(keys.size());
 
-    if(keys[2] == "articles")
-    {
-        state_["article_name"] = keys[3];
-        rep.content = template_engine_.generate_html("articles");
-    }
+    auto name = keys.front(); keys.pop_front();
+
+    rep.content = template_engine_.run_template(name, {std::begin(keys), std::end(keys)});
 
     rep.status = reply::ok;
     rep.headers.resize(2);

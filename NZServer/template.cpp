@@ -30,7 +30,7 @@ std::string template_path(const std::string & file)
     return "/template/" + file + ".tpl";
 }
 
-std::string template_engine::generate_html(const std::string & file)
+std::string template_engine::run_template(const std::string & file, const std::vector<std::string> & arguments)
 {
     auto full_path = template_path(file);
     if(file_store_.is_modified(full_path))
@@ -38,7 +38,7 @@ std::string template_engine::generate_html(const std::string & file)
         parse_file(full_path);
     }
 
-    return run_template(templates_[full_path]);
+    return run_template(templates_[full_path], arguments);
 }
 
 void template_engine::parse_file(const std::string &file)
@@ -99,9 +99,14 @@ void template_engine::gather(int n, const std::string data)
     computed_data_[n] += data;
 }
 
-std::string template_engine::run_template(const template_structure & structure)
+std::string template_engine::run_template(const template_structure & structure, const std::vector<std::string> & arguments)
 {
     BOOST_LOG_TRIVIAL(error) << "Running template " << structure.name;
+
+    for(int i = 0 ; i < arguments.size() ; i++)
+    {
+        state_["arguments"][i] = arguments[i];
+    }
 
     computed_data_.clear();
     if(!state_(structure.code.c_str()))
