@@ -21,6 +21,7 @@ public:
 
     result_type parse(const char * data, size_t length);
     request & request();
+    bool has_keepalive();
 
 private:
     int on_header_field(const char * at, size_t length);

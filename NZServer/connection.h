@@ -12,9 +12,9 @@
 #include <array>
 #include <memory>
 #include <boost/asio.hpp>
-#include "reply.h"
 #include "request_parser.h"
 #include "request_handler.h"
+#include "reply.h"
 
 /// Represents a single connection from a client.
 class connection
@@ -23,32 +23,21 @@ public:
     connection(const connection&) = delete;
     connection& operator=(const connection&) = delete;
 
-    /// Construct a connection with the given socket.
     explicit connection(boost::asio::ip::tcp::socket socket, request_handler & handler);
 
     connection(connection&&);
 
-    /// Start the first asynchronous operation for the connection.
     void start();
-
-    /// Stop all asynchronous operations associated with the connection.
     void stop();
 
 private:
-    /// Perform an asynchronous read operation.
     void do_read();
+    void do_write(const reply & reply_, bool close_connection);
 
-    /// Perform an asynchronous write operation.
-    void do_write();
-
-    /// Socket for the connection.
     boost::asio::ip::tcp::socket socket_;
     
     /// Buffer for incoming data.
     std::array<char, 8192> buffer_;
-
-    request request_;
-    reply reply_;
 
     request_parser request_parser_;
 

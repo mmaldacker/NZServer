@@ -44,17 +44,17 @@ void connection::do_read()
             BOOST_LOG_TRIVIAL(debug) << "Reading " << bytes_transferred << " bytes";
 
             request_parser::result_type result = request_parser_.parse(buffer_.data(), bytes_transferred);
-            request_ = request_parser_.request();
 
             if (result == request_parser::good)
             {
-                request_handler_.handle_request(request_, reply_);
-                do_write();
+                reply reply_;
+                request_handler_.handle_request(request_parser_.request(), reply_);
+
+                do_write(reply_, !request_parser_.has_keepalive());
             }
             else if (result == request_parser::bad)
             {
-                reply_ = reply::stock_reply(reply::bad_request);
-                do_write();
+                do_write(reply::stock_reply(reply::bad_request), true);
             }
             else
             {
@@ -63,33 +63,41 @@ void connection::do_read()
         }
         else if (ec != boost::asio::error::operation_aborted)
         {
-            // stop
+            // FIXME need to remove from server vector
+            socket_.close();
         }
     });
 }
 
-void connection::do_write()
+void connection::do_write(const reply & reply_, bool close_connection)
 {
     BOOST_LOG_TRIVIAL(info) << "Sending response";
 
     boost::asio::async_write(socket_, reply_.to_buffers(),
-    [this](boost::system::error_code ec, std::size_t bytes_transfered)
+    [=](boost::system::error_code ec, std::size_t bytes_transfered)
     {
+        if(!close_connection)
+        {
+            return;
+        }
+
         if (!ec)
         {
-            // Initiate graceful connection closure.
             boost::system::error_code ignored_ec;
             socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
         }
 
         if (ec != boost::asio::error::operation_aborted)
         {
-            // stop
+            // FIXME need to remove from server vector
+            socket_.close();
         }
-
-        BOOST_LOG_TRIVIAL(info) << "Sent " << bytes_transfered << " bytes";
-
     });
+
+    if(!close_connection)
+    {
+        do_read();
+    }
 }
 
 

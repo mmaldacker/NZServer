@@ -63,11 +63,10 @@ request_parser::result_type request_parser::parse(const char * data, size_t leng
 
     if (parser_.upgrade)
     {
-        /* handle new protocol */
+        // FIXME handle new protocol
     }
     else if (nparsed != length)
     {
-        /* Handle error. Usually just close the connection. */
         return result_type::bad;
     }
 
@@ -79,13 +78,25 @@ request & request_parser::request()
     return request_;
 }
 
+bool request_parser::has_keepalive()
+{
+    for(auto && header : request_.headers)
+    {
+        if(header.name == "Connection" && header.value == "Keep-Alive")
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int request_parser::on_header_field(const char * at, size_t length)
 {
     if(last_was_value_)
     {
-        header h;
-        h.name = std::string(at, length);
-        request_.headers.push_back(h);
+        header h{std::string(at, length), std::string()};
+        request_.headers.push_back(std::move(h));
     }
     else
     {
@@ -99,14 +110,7 @@ int request_parser::on_header_field(const char * at, size_t length)
 
 int request_parser::on_header_value(const char * at, size_t length)
 {
-    if(!last_was_value_)
-    {
-        request_.headers.back().value = std::string(at, length);
-    }
-    else
-    {
-        request_.headers.back().value += std::string(at, length);
-    }
+    request_.headers.back().value += std::string(at, length);
 
     last_was_value_ = true;
 
