@@ -51,6 +51,9 @@ private:
     void gather(int x, const std::string data);
     void set_header(const std::string key, const std::string value);
 
+    void set_arguments(const std::vector<std::string> & arguments, const request & req);
+    void clear_arguments(const std::vector<std::string> & arguments, const request & req);
+
     sel::State & state_;
     std::map<std::string, template_structure> templates_;
     std::map<int, std::string> computed_data_;

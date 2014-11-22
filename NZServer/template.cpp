@@ -67,7 +67,7 @@ void template_engine::parse_file(const std::string & file, template_structure & 
     }
 
     std::string::size_type loc = 0, end = 0;
-    while((loc = content.find("{", loc+1)) != std::string::npos && loc != content.size() - 1)
+    while((loc = content.find("{", loc)) != std::string::npos && loc != content.size() - 1)
     {
         if(content[loc+1] == '%')
         {
@@ -113,16 +113,8 @@ void template_engine::set_header(const std::string key, const std::string value)
     extra_headers_->push_back({key, value});
 }
 
-bool template_engine::run_template(const template_structure & structure,
-                                   const std::vector<std::string> & arguments,
-                                   const request & req,
-                                   std::string & content,
-                                   std::vector<header> & headers)
+void template_engine::set_arguments(const std::vector<std::string> & arguments, const request & req)
 {
-    BOOST_LOG_TRIVIAL(info) << "Running template " << structure.name;
-
-    // FIXME need to clear arguments and headers beforehand
-
     for(int i = 0 ; i < arguments.size() ; i++)
     {
         state_["arguments"][i] = arguments[i];
@@ -146,6 +138,40 @@ bool template_engine::run_template(const template_structure & structure,
         auto value = pair.substr(eq+1);
         state_["post"][key.c_str()] = value;
     }
+}
+
+void template_engine::clear_arguments(const std::vector<std::string> & arguments, const request & req)
+{
+    for(int i = 0 ; i < arguments.size() ; i++)
+    {
+        state_["arguments"][i] = "";
+    }
+
+    for(auto && h : req.headers)
+    {
+        state_["headers"][h.name.c_str()] = "";
+    }
+
+    // FIXME need to properly URL decode
+    std::vector<std::string> pairs;
+    boost::split(pairs,req.content,boost::is_any_of("&"));
+    for(auto && pair : pairs)
+    {
+        auto eq = pair.find('=');
+        auto key = pair.substr(0, eq);
+        state_["post"][key.c_str()] = "";
+    }
+}
+
+bool template_engine::run_template(const template_structure & structure,
+                                   const std::vector<std::string> & arguments,
+                                   const request & req,
+                                   std::string & content,
+                                   std::vector<header> & headers)
+{
+    BOOST_LOG_TRIVIAL(info) << "Running template " << structure.name;
+
+    set_arguments(arguments, req);
 
     extra_headers_ = &headers;
     computed_data_.clear();
@@ -153,6 +179,7 @@ bool template_engine::run_template(const template_structure & structure,
     if(!state_(structure.code.c_str()))
     {
         BOOST_LOG_TRIVIAL(error) << "Error running template:\n" << structure.code << "Error: " << state_;
+        clear_arguments(arguments, req);
         return false;
     }
 
@@ -161,6 +188,8 @@ bool template_engine::run_template(const template_structure & structure,
         content += computed_data_[i];
         content += structure.blocks[i];
     }
+
+    clear_arguments(arguments, req);
 
     return true;
 }
