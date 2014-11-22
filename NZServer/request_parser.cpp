@@ -125,6 +125,7 @@ int request_parser::on_url(const char * at, size_t length)
 
 int request_parser::on_body(const char * at, size_t length)
 {
+    request_.content += std::string(at, length);
     return 0;
 }
 

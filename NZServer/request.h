@@ -22,6 +22,7 @@ struct request
     int http_version_major;
     int http_version_minor;
     std::vector<header> headers;
+    std::string content;
 
     void clear()
     {
@@ -30,16 +31,13 @@ struct request
         http_version_major = 0;
         http_version_minor = 0;
         headers.clear();
+        content.clear();
     }
 };
 
 inline std::ostream & operator<<(std::ostream & o, const request & req)
 {
-    o << "URI " << req.uri << " METHOD " << req.method << " | ";
-    /*for(auto && h : req.headers)
-    {
-        o << h.name << "=" << h.value << " | ";
-    }*/
+    o << "URI " << req.uri << " METHOD " << req.method;
 
     return o;
 }

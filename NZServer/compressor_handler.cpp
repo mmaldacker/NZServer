@@ -56,5 +56,12 @@ void compressor_handler::handle_request(const request &req, reply &rep)
 
     rep.content = deflate(rep.content);
     rep.headers.push_back({"Content-Encoding", "deflate"});
-    rep.headers[0].value = std::to_string(rep.content.size());
+    for(auto & h : rep.headers)
+    {
+        if(h.name == "Content-Length")
+        {
+            h.value = std::to_string(rep.content.size());
+            break;
+        }
+    }
 }

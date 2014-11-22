@@ -14,6 +14,7 @@
 #include "selene.h"
 #include "database.h"
 #include "articles.h"
+#include "session.h"
 #include "template.h"
 #include "file_service.h"
 
@@ -27,6 +28,7 @@ private:
     sel::State state_;
     database db_;
     articles articles_;
+    session session_;
     template_engine template_engine_;
     file_store & file_store_;
 };

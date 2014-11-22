@@ -12,6 +12,7 @@
 #include "selene.h"
 #include <vector>
 #include "file_service.h"
+#include "request.h"
 
 struct template_structure
 {
@@ -31,18 +32,29 @@ class template_engine
 public:
     template_engine(sel::State & state, file_store &);
 
-    std::string run_template(const std::string & file, const std::vector<std::string> & arguments);
-    void parse_file(const std::string & file);
+    bool run_template(const std::string & file,
+                      const std::vector<std::string> & arguments,
+                      const request & req,
+                      std::string & content,
+                      std::vector<header> & headers);
 
 private:
-    std::string run_template(const template_structure & structure, const std::vector<std::string> & arguments);
+    bool run_template(const template_structure & structure,
+                      const std::vector<std::string> & arguments,
+                      const request & req,
+                      std::string & content,
+                      std::vector<header> & headers);
+
+    void parse_file(const std::string & file);
     void parse_file(const std::string & file, template_structure & structure);
 
     void gather(int x, const std::string data);
+    void set_header(const std::string key, const std::string value);
 
     sel::State & state_;
     std::map<std::string, template_structure> templates_;
     std::map<int, std::string> computed_data_;
+    std::vector<header> * extra_headers_;
     file_store & file_store_;
 };
 

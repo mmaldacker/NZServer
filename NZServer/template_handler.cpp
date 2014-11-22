@@ -13,6 +13,7 @@ template_handler::template_handler(file_store & store)
     : state_(true)
     , db_(store.get_root() + "/db/test.db")
     , articles_(db_, state_)
+    , session_(state_)
     , template_engine_(state_, store)
     , file_store_(store)
 {
@@ -29,12 +30,14 @@ void template_handler::handle_request(const request & req, reply & rep)
 
     auto name = keys.front(); keys.pop_front();
 
-    rep.content = template_engine_.run_template(name, {std::begin(keys), std::end(keys)});
-
-    rep.status = reply::ok;
-    rep.headers.resize(2);
-    rep.headers[0].name = "Content-Length";
-    rep.headers[0].value = std::to_string(rep.content.size());
-    rep.headers[1].name = "Content-Type";
-    rep.headers[1].value = "text/html";
+    if(template_engine_.run_template(name, {std::begin(keys), std::end(keys)}, req, rep.content, rep.headers))
+    {
+        rep.status = reply::ok;
+        rep.headers.push_back({"Content-Length", std::to_string(rep.content.size())});
+        rep.headers.push_back({"Content-Type", "text/html"});
+    }
+    else
+    {
+        rep = reply::stock_reply(reply::internal_server_error);
+    }
 }

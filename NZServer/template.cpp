@@ -10,13 +10,18 @@
 #include <fstream>
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string.hpp>
 #include "utils.h"
 
 template_engine::template_engine(sel::State & state, file_store & store) : state_(state), file_store_(store)
 {
     using namespace std::placeholders;
+
     std::function<void(int,const std::string)> gather_function = std::bind(&template_engine::gather, this, _1, _2);
     state_["display"] = gather_function;
+
+    std::function<void(const std::string, const std::string)> set_header_function = std::bind(&template_engine::set_header, this, _1, _2);
+    state_["set_header"] = set_header_function;
 
     auto files = file_store_.get_files("/template");
     for(auto && file : files)
@@ -30,7 +35,11 @@ std::string template_path(const std::string & file)
     return "/template/" + file + ".tpl";
 }
 
-std::string template_engine::run_template(const std::string & file, const std::vector<std::string> & arguments)
+bool template_engine::run_template(const std::string & file,
+                                   const std::vector<std::string> & arguments,
+                                   const request & req,
+                                   std::string & content,
+                                   std::vector<header> & headers)
 {
     auto full_path = template_path(file);
     if(file_store_.is_modified(full_path))
@@ -38,7 +47,7 @@ std::string template_engine::run_template(const std::string & file, const std::v
         parse_file(full_path);
     }
 
-    return run_template(templates_[full_path], arguments);
+    return run_template(templates_[full_path], arguments, req, content, headers);
 }
 
 void template_engine::parse_file(const std::string &file)
@@ -99,27 +108,59 @@ void template_engine::gather(int n, const std::string data)
     computed_data_[n] += data;
 }
 
-std::string template_engine::run_template(const template_structure & structure, const std::vector<std::string> & arguments)
+void template_engine::set_header(const std::string key, const std::string value)
 {
-    BOOST_LOG_TRIVIAL(error) << "Running template " << structure.name;
+    extra_headers_->push_back({key, value});
+}
+
+bool template_engine::run_template(const template_structure & structure,
+                                   const std::vector<std::string> & arguments,
+                                   const request & req,
+                                   std::string & content,
+                                   std::vector<header> & headers)
+{
+    BOOST_LOG_TRIVIAL(info) << "Running template " << structure.name;
+
+    // FIXME need to clear arguments and headers beforehand
 
     for(int i = 0 ; i < arguments.size() ; i++)
     {
         state_["arguments"][i] = arguments[i];
     }
 
+    state_["method"] = req.method;
+    state_["uri"] = req.uri;
+
+    for(auto && h : req.headers)
+    {
+        state_["headers"][h.name.c_str()] = h.value;
+    }
+
+    // FIXME need to properly URL decode
+    std::vector<std::string> pairs;
+    boost::split(pairs,req.content,boost::is_any_of("&"));
+    for(auto && pair : pairs)
+    {
+        auto eq = pair.find('=');
+        auto key = pair.substr(0, eq);
+        auto value = pair.substr(eq+1);
+        state_["post"][key.c_str()] = value;
+    }
+
+    extra_headers_ = &headers;
     computed_data_.clear();
+
     if(!state_(structure.code.c_str()))
     {
         BOOST_LOG_TRIVIAL(error) << "Error running template:\n" << structure.code << "Error: " << state_;
+        return false;
     }
 
-    std::string content;
     for(int i = 0 ; i < structure.blocks.size() ; ++i)
     {
         content += computed_data_[i];
         content += structure.blocks[i];
     }
 
-    return content;
+    return true;
 }
