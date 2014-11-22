@@ -26,7 +26,7 @@ public:
     article * get(const std::string name);
     
 private:
-    database & db_;
+    query query_;
     article current_article_;
 };
 

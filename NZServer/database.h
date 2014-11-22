@@ -11,27 +11,11 @@
 
 #include <sqlite3.h>
 #include <string>
+#include "query.h"
 
 class database
 {
 public:
-    class query
-    {
-    public:
-        ~query();
-        
-        bool step();
-
-        template<typename T>
-        T at(int column);
-
-    private:
-        friend class database;
-        
-        query(sqlite3_stmt * statement);
-        sqlite3_stmt * statement_;
-    };
-
     database(const std::string & name);
     ~database();
 
@@ -40,11 +24,5 @@ public:
 private:
     sqlite3 * handle_;
 };
-
-template<>
-inline std::string database::query::at(int column)
-{
-    return reinterpret_cast<const char*>(sqlite3_column_text(statement_, column));
-}
 
 #endif /* defined(__NZServer__database__) */

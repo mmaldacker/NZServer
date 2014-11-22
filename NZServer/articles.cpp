@@ -8,7 +8,7 @@
 
 #include "articles.h"
 
-articles::articles(database & db, sel::State & state) : db_(db)
+articles::articles(database & db, sel::State & state) : query_(db.exec("select long_title, content from articles where short_title = ?"))
 {
     state["article"].SetClass<article>("title", &article::title);
     state["article"].SetClass<article>("content", &article::content);
@@ -17,11 +17,12 @@ articles::articles(database & db, sel::State & state) : db_(db)
 
 articles::article * articles::get(const std::string name)
 {
-    auto q = db_.exec("select long_title, content from articles where short_title = '" + name + "'");
+    query_.reset();
+    query_.bind(name);
 
-    if(q.step())
+    if(query_.step())
     {
-        current_article_ = {q.at<std::string>(0), q.at<std::string>(1)};
+        current_article_ = {query_.at<std::string>(0), query_.at<std::string>(1)};
     }
 
     return &current_article_;
