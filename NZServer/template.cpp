@@ -13,15 +13,16 @@
 #include <boost/algorithm/string.hpp>
 #include "utils.h"
 
-template_engine::template_engine(sel::State & state, file_store & store) : state_(state), file_store_(store)
+template_engine::template_engine(LuaIntf::LuaContext & state, file_store & store) : state_(state), file_store_(store)
 {
     using namespace std::placeholders;
-
     std::function<void(int,const std::string)> gather_function = std::bind(&template_engine::gather, this, _1, _2);
-    state_["display"] = gather_function;
-
     std::function<void(const std::string, const std::string)> set_header_function = std::bind(&template_engine::set_header, this, _1, _2);
-    state_["set_header"] = set_header_function;
+
+    LuaBinding(state_).beginModule("template_engine")
+    .addFunction("display", gather_function)
+    .addFunction("set_header", set_header_function)
+    .endModule();
 
     auto files = file_store_.get_files("/template");
     for(auto && file : files)
@@ -82,7 +83,7 @@ void template_engine::parse_file(const std::string & file, template_structure & 
             structure.blocks.push_back(content.substr(end, loc - end));
             end = content.find("}}", loc) + 2;
 
-            structure.code += "display(" + std::to_string(structure.blocks.size()) + ", " + content.substr(loc + 2, end - loc - 4) + ")\n";
+            structure.code += "template_engine.display(" + std::to_string(structure.blocks.size()) + ", " + content.substr(loc + 2, end - loc - 4) + ")\n";
             loc = end;
         }
         else if(content[loc+1] == '#')
@@ -115,19 +116,28 @@ void template_engine::set_header(const std::string key, const std::string value)
 
 void template_engine::set_arguments(const std::vector<std::string> & arguments, const request & req)
 {
+    LuaIntf::LuaRef lua_arguments = LuaIntf::LuaRef::createTable(state_);
+    state_.setGlobal("arguments", lua_arguments);
+
     for(int i = 0 ; i < arguments.size() ; i++)
     {
-        state_["arguments"][i] = arguments[i];
+        lua_arguments[i] = arguments[i];
     }
 
-    state_["method"] = req.method;
-    state_["uri"] = req.uri;
+    state_.setGlobal("method", req.method);
+    state_.setGlobal("uri", req.uri);
+
+    LuaIntf::LuaRef lua_headers = LuaIntf::LuaRef::createTable(state_);
+    state_.setGlobal("headers", lua_headers);
 
     for(auto && h : req.headers)
     {
-        state_["headers"][h.name.c_str()] = h.value;
+        lua_headers[h.name.c_str()] = h.value;
     }
 
+    LuaIntf::LuaRef lua_post = LuaIntf::LuaRef::createTable(state_);
+    state_.setGlobal("post", lua_post);
+    
     // FIXME need to properly URL decode
     std::vector<std::string> pairs;
     boost::split(pairs,req.content,boost::is_any_of("&"));
@@ -136,31 +146,19 @@ void template_engine::set_arguments(const std::vector<std::string> & arguments, 
         auto eq = pair.find('=');
         auto key = pair.substr(0, eq);
         auto value = pair.substr(eq+1);
-        state_["post"][key.c_str()] = value;
+        lua_post[key.c_str()] = value;
     }
 }
 
 void template_engine::clear_arguments(const std::vector<std::string> & arguments, const request & req)
 {
-    for(int i = 0 ; i < arguments.size() ; i++)
-    {
-        state_["arguments"][i] = "";
-    }
+    LuaIntf::LuaRef lua_arguments(state_, "arguments");
+    LuaIntf::LuaRef lua_headers(state_, "headers");
+    LuaIntf::LuaRef lua_post(state_, "post");
 
-    for(auto && h : req.headers)
-    {
-        state_["headers"][h.name.c_str()] = "";
-    }
-
-    // FIXME need to properly URL decode
-    std::vector<std::string> pairs;
-    boost::split(pairs,req.content,boost::is_any_of("&"));
-    for(auto && pair : pairs)
-    {
-        auto eq = pair.find('=');
-        auto key = pair.substr(0, eq);
-        state_["post"][key.c_str()] = "";
-    }
+    lua_arguments = nullptr;
+    lua_headers = nullptr;
+    lua_post = nullptr;
 }
 
 bool template_engine::run_template(const template_structure & structure,
@@ -176,12 +174,7 @@ bool template_engine::run_template(const template_structure & structure,
     extra_headers_ = &headers;
     computed_data_.clear();
 
-    if(!state_(structure.code.c_str()))
-    {
-        BOOST_LOG_TRIVIAL(error) << "Error running template:\n" << structure.code << "Error: " << state_;
-        clear_arguments(arguments, req);
-        return false;
-    }
+    state_.doString(structure.code.c_str());
 
     for(int i = 0 ; i < structure.blocks.size() ; ++i)
     {

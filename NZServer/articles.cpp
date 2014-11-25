@@ -8,22 +8,67 @@
 
 #include "articles.h"
 
-articles::articles(database & db, sel::State & state) : query_(db.exec("select long_title, content from articles where short_title = ?"))
+articles::articles(database & db, LuaIntf::LuaContext & state)
+    : article_query_(db.exec("select long_title, content from articles where short_title = ?"))
+    , all_articles_query_(db.exec("select long_title, short_title, image from articles"))
 {
-    state["article"].SetClass<article>("title", &article::title);
-    state["article"].SetClass<article>("content", &article::content);
-    state["articles"].SetObj(*this, "get", &articles::get);
+    LuaIntf::LuaBinding(state)
+    .beginClass<article>("article")
+    .addVariable("short_title", &article::short_title)
+    .addVariable("title", &article::title)
+    .addVariable("content", &article::content)
+    .addVariable("image", &article::image)
+    .addVariable("abstract", &article::abstract)
+    .addStaticFunction("get_for", [&](const std::string & name) { return get(name); })
+    .addStaticFunction("get_all", [&]() { return get_all(); })
+    .endClass();
+
+    LuaIntf::LuaBinding(state)
+    .beginClass<iterator>("article_iterator")
+    .addFunction("get", &iterator::get)
+    .endClass();
 }
 
-articles::article * articles::get(const std::string name)
+articles::article articles::get(const std::string & name)
 {
-    query_.reset();
-    query_.bind(name);
+    article_query_.reset();
+    article_query_.bind(name);
 
-    if(query_.step())
+    if(article_query_.step())
     {
-        current_article_ = {query_.at<std::string>(0), query_.at<std::string>(1)};
+        article a;
+
+        a.title = article_query_.at<std::string>(0);
+        a.content = article_query_.at<std::string>(1);
+        a.short_title = name;
+
+        return a;
     }
 
-    return &current_article_;
+    return {};
+}
+
+articles::article * articles::iterator::get()
+{
+    if(n < articles.size()) return &articles[n++];
+    else return nullptr;
+}
+
+articles::iterator articles::get_all()
+{
+    iterator iterator_;
+    iterator_.n = 0;
+
+    all_articles_query_.reset();
+    while(all_articles_query_.step())
+    {
+        article a;
+        a.title = all_articles_query_.at<std::string>(0);
+        a.short_title = all_articles_query_.at<std::string>(1);
+        a.image = all_articles_query_.at<std::string>(2);
+
+        iterator_.articles.push_back(a);
+    }
+
+    return iterator_;
 }

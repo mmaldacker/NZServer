@@ -11,7 +11,8 @@
 
 #include "request.h"
 #include "reply.h"
-#include "selene.h"
+#define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
+#include "LuaIntf.h"
 #include "database.h"
 #include "articles.h"
 #include "session.h"
@@ -25,7 +26,7 @@ public:
     void handle_request(const request & req, reply & rep);
 
 private:
-    sel::State state_;
+    LuaIntf::LuaContext state_;
     database db_;
     articles articles_;
     session session_;

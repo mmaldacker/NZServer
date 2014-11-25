@@ -9,7 +9,8 @@
 #ifndef __NZServer__template__
 #define __NZServer__template__
 
-#include "selene.h"
+#define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
+#include "LuaIntf.h"
 #include <vector>
 #include "file_service.h"
 #include "request.h"
@@ -30,7 +31,7 @@ struct template_structure
 class template_engine
 {
 public:
-    template_engine(sel::State & state, file_store &);
+    template_engine(LuaIntf::LuaContext & state, file_store &);
 
     bool run_template(const std::string & file,
                       const std::vector<std::string> & arguments,
@@ -54,7 +55,7 @@ private:
     void set_arguments(const std::vector<std::string> & arguments, const request & req);
     void clear_arguments(const std::vector<std::string> & arguments, const request & req);
 
-    sel::State & state_;
+    LuaIntf::LuaContext & state_;
     std::map<std::string, template_structure> templates_;
     std::map<int, std::string> computed_data_;
     std::vector<header> * extra_headers_;

@@ -3,7 +3,6 @@
     CacheMiss
     <ul class="navigation list-inline right ">
       <li><a href="/main">Main</a></li>
-      <li><a href="/login">Login</a></li>
     </ul>
   </div>
   <div class="container">

@@ -33,7 +33,7 @@ if method == "GET" then
 elseif method == "POST" then 
   if session.login(post["login"], post["password"]) then
     cookie = session.get_session_cookie(post["login"])
-    set_header("Set-Cookie", cookie)
+    template_engine.set_header("Set-Cookie", cookie)
 %}
     {{ "Successful!" }}
 {% 
@@ -44,6 +44,8 @@ elseif method == "POST" then
   end 
 end
 %}
+
+{# footer #}
 
 <script src="/file/js/default.js"></script>
 

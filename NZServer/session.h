@@ -9,14 +9,15 @@
 #ifndef __NZServer__session__
 #define __NZServer__session__
 
-#include "selene.h"
+#define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
+#include "LuaIntf.h"
 
 #include <map>
 
 class session
 {
 public:
-    session(sel::State & state);
+    session(LuaIntf::LuaContext & state);
 
     bool login(const std::string name, const std::string password);
     std::string get_session_cookie(const std::string name);

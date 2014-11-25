@@ -10,14 +10,13 @@
 #include <boost/algorithm/string.hpp>
 
 template_handler::template_handler(file_store & store)
-    : state_(true)
-    , db_(store.get_root() + "/db/test.db")
+    : db_(store.get_root() + "/db/test.db")
     , articles_(db_, state_)
     , session_(state_)
     , template_engine_(state_, store)
     , file_store_(store)
 {
-
+    state_.importLibs();
 }
 
 void template_handler::handle_request(const request & req, reply & rep)

@@ -67,7 +67,15 @@ query & query::bind(Args &&... args)
 template<>
 inline std::string query::at(int column)
 {
-    return reinterpret_cast<const char*>(sqlite3_column_text(statement_, column));
+    auto text = sqlite3_column_text(statement_, column);
+    if(text)
+    {
+        return reinterpret_cast<const char*>(text);
+    }
+    else
+    {
+        return {};
+    }
 }
 
 #endif /* defined(__NZServer__query__) */

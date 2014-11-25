@@ -7,6 +7,7 @@
 //
 
 #include "session.h"
+#include <vector>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -14,12 +15,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
-session::session(sel::State & state)
+session::session(LuaIntf::LuaContext & state)
 {
-    state["session"].SetObj(*this,
-                            "login", &session::login,
-                            "get_session_cookie", &session::get_session_cookie,
-                            "is_logged_in", &session::is_logged_in);
+    LuaBinding(state)
+    .beginModule("session")
+    .addFunction("login", [&](const std::string & name, const std::string password) { return login(name, password); })
+    .addFunction("get_session_cookie", [&](const std::string & name){ return get_session_cookie(name); })
+    .addFunction("is_logged_in", [&](const std::string & cookie) { return is_logged_in(cookie); })
+    .endModule();
 }
 
 bool session::login(const std::string name, const std::string password)
