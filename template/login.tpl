@@ -5,7 +5,8 @@
 {% header = {title = "Login", abstract = ""} %}
 {# header #}
 
-<div class="container font-light">
+<div class="grey-row" id="headings">
+  <div class="container row-2 font-light">
     <div class="clear row">
         <h2 class="h3 font-light">Session</h2>
 {% 
@@ -45,6 +46,7 @@ elseif method == "POST" then
   end 
 end
 %}
+    </div>
   </div>
 </div>
 

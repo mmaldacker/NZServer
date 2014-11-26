@@ -30,7 +30,7 @@ local a = article.get_for(arguments[0])
 		    <legend>Edit</legend>
 		    <div class="row clear">
 		      <label class="block" for="title">Title</label>
-		      <input type="text" name="title" cols="60" value="]].. a.title ..[[">
+		      <input type="text" name="title" cols="80" value="]].. a.title ..[[">
 		    </div>
 		    <div class="row clear">
 		      <label class="block" for="image">Image</label>

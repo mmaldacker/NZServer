@@ -9,7 +9,7 @@
 #include "articles.h"
 
 articles::articles(database & db, LuaIntf::LuaContext & state)
-    : article_query_(db.exec("select long_title, content from articles where short_title = ?"))
+    : article_query_(db.exec("select long_title, abstract, image, content from articles where short_title = ?"))
     , all_articles_query_(db.exec("select long_title, short_title, image from articles"))
     , article_update_(db.exec("update articles set long_title = ?, abstract = ?, image = ?, content = ? where short_title = ?"))
 {
@@ -44,7 +44,9 @@ articles::article articles::get(const std::string & name)
         article a;
 
         a.title = article_query_.at<std::string>(0);
-        a.content = article_query_.at<std::string>(1);
+        a.abstract = article_query_.at<std::string>(1);
+        a.image = article_query_.at<std::string>(2);
+        a.content = article_query_.at<std::string>(3);
         a.short_title = name;
 
         return a;

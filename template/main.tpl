@@ -5,8 +5,9 @@
 {% header = {title = "Main", abstract = "Some informative texts and tutorials"} %}
 {# header #}
 
-<div class="container">
-<div class="row clear">
+<div class="grey-row" id="headings">
+  <div class="container row-2 font-light">
+    <div class="clear row">
 {% 
 for a in article.get_all() do
 %}
@@ -19,9 +20,9 @@ for a in article.get_all() do
 {%
 end
 %}
+    </div>
+  </div>
 </div>
-</div>
-
 
 {# footer #}
 
