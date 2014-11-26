@@ -20,7 +20,6 @@ public:
     void handle_request(const request & req, reply & rep);
 
 private:
-    bool url_decode(const std::string& in, std::string& out);
 
     file_store & file_store_;
 };

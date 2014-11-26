@@ -29,6 +29,7 @@ public:
         std::string content;
     };
 
+    void update(const article & article_);
     article get(const std::string & name);
 
     class iterator : public LuaIntf::CppFunctor
@@ -47,6 +48,7 @@ public:
 private:
     query article_query_;
     query all_articles_query_;
+    query article_update_;
 };
 
 #endif /* defined(__NZServer__articles__) */

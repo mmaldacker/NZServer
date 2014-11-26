@@ -14,7 +14,6 @@
 #include <vector>
 #include <map>
 
-// FIXME not thread safe!
 class file_store
 {
 public:

@@ -2,9 +2,12 @@
 <html lang="en" class="no-js">
 {# head #}
 <body>
-{% header = {title = "Articles", abstract = "Some informative texts and tutorials"} %}
+{% header = {title = "Login", abstract = ""} %}
 {# header #}
 
+<div class="container font-light">
+    <div class="clear row">
+        <h2 class="h3 font-light">Session</h2>
 {% 
 if method == "GET" then 
   if headers["Cookie"] and session.is_logged_in(headers["Cookie"]) then
@@ -16,15 +19,13 @@ if method == "GET" then
 {{[[
 <form action="" method="post">
   <fieldset>
-    <legend>Login</legend>
-
-      <label for="login">Username</label>
-      <input type="text" name="login" cols="60" placeholder="Your login...">
-
-      <label for="password">Password</label>
-      <input type="password" name="password" cols="60">
-
+    <div class="row clear">
+      <input type="text" name="login" cols="60" placeholder="Username">
+      <input type="password" name="password" cols="60" placeholder="Password">
+    </div>
+    <div class="row clear">
       <input type="submit" value="Login" class="button">
+    </div>
   </fieldset>
 </form>
 ]]}}
@@ -44,6 +45,8 @@ elseif method == "POST" then
   end 
 end
 %}
+  </div>
+</div>
 
 {# footer #}
 

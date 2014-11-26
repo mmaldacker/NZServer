@@ -138,15 +138,16 @@ void template_engine::set_arguments(const std::vector<std::string> & arguments, 
     LuaIntf::LuaRef lua_post = LuaIntf::LuaRef::createTable(state_);
     state_.setGlobal("post", lua_post);
     
-    // FIXME need to properly URL decode
     std::vector<std::string> pairs;
     boost::split(pairs,req.content,boost::is_any_of("&"));
     for(auto && pair : pairs)
     {
         auto eq = pair.find('=');
-        auto key = pair.substr(0, eq);
-        auto value = pair.substr(eq+1);
-        lua_post[key.c_str()] = value;
+        std::string key, value;
+        if(url_decode(pair.substr(0, eq), key) && url_decode(pair.substr(eq+1), value))
+        {
+            lua_post[key.c_str()] = value;
+        }
     }
 }
 

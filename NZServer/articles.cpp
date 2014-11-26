@@ -11,9 +11,11 @@
 articles::articles(database & db, LuaIntf::LuaContext & state)
     : article_query_(db.exec("select long_title, content from articles where short_title = ?"))
     , all_articles_query_(db.exec("select long_title, short_title, image from articles"))
+    , article_update_(db.exec("update articles set long_title = ?, abstract = ?, image = ?, content = ? where short_title = ?"))
 {
     LuaIntf::LuaBinding(state)
     .beginClass<article>("article")
+    .addConstructor(LUA_ARGS())
     .addVariable("short_title", &article::short_title)
     .addVariable("title", &article::title)
     .addVariable("content", &article::content)
@@ -21,7 +23,15 @@ articles::articles(database & db, LuaIntf::LuaContext & state)
     .addVariable("abstract", &article::abstract)
     .addStaticFunction("get_for", [&](const std::string & name) { return get(name); })
     .addStaticFunction("get_all", [&](lua_State * state) { return get_all(state); })
+    .addStaticFunction("update", [&](const article & article_) { update(article_); })
     .endClass();
+}
+
+void articles::update(const article & article_)
+{
+    article_update_.reset();
+    article_update_.bind(article_.title, article_.abstract, article_.image, article_.content, article_.short_title);
+    article_update_.step();
 }
 
 articles::article articles::get(const std::string & name)
