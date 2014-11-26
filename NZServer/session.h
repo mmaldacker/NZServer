@@ -19,9 +19,9 @@ class session
 public:
     session(LuaIntf::LuaContext & state);
 
-    bool login(const std::string name, const std::string password);
-    std::string get_session_cookie(const std::string name);
-    bool is_logged_in(const std::string cookie);
+    bool login(const std::string & name, const std::string & password);
+    std::string get_session_cookie(const std::string & name);
+    bool is_logged_in(const std::string & cookie);
 
 private:
     std::map<std::string, std::string> sessions_;

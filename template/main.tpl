@@ -6,10 +6,7 @@
 {# header #}
 
 {% 
-it = article.get_all()
-while true do
-  local a = it:get()
-  if a == nil then break end
+for a in article.get_all() do
 %}
 {{a.title}}
 {%

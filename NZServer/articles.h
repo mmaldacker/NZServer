@@ -31,10 +31,10 @@ public:
 
     article get(const std::string & name);
 
-    class iterator
+    class iterator : public LuaIntf::CppFunctor
     {
     public:
-        article * get();
+        int run(lua_State* L) override;
 
         friend class articles;
     private:
@@ -42,7 +42,7 @@ public:
         std::vector<article> articles;
     };
 
-    iterator get_all();
+    int get_all(lua_State * state);
 
 private:
     query article_query_;

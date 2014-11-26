@@ -20,12 +20,7 @@ articles::articles(database & db, LuaIntf::LuaContext & state)
     .addVariable("image", &article::image)
     .addVariable("abstract", &article::abstract)
     .addStaticFunction("get_for", [&](const std::string & name) { return get(name); })
-    .addStaticFunction("get_all", [&]() { return get_all(); })
-    .endClass();
-
-    LuaIntf::LuaBinding(state)
-    .beginClass<iterator>("article_iterator")
-    .addFunction("get", &iterator::get)
+    .addStaticFunction("get_all", [&](lua_State * state) { return get_all(state); })
     .endClass();
 }
 
@@ -48,16 +43,24 @@ articles::article articles::get(const std::string & name)
     return {};
 }
 
-articles::article * articles::iterator::get()
+int articles::iterator::run(lua_State* state)
 {
-    if(n < articles.size()) return &articles[n++];
-    else return nullptr;
+    if(n < articles.size())
+    {
+        LuaIntf::LuaType<article*>::push(state, &articles[n++]);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+
 }
 
-articles::iterator articles::get_all()
+int articles::get_all(lua_State * state)
 {
-    iterator iterator_;
-    iterator_.n = 0;
+    iterator * iterator_ = new iterator();
+    iterator_->n = 0;
 
     all_articles_query_.reset();
     while(all_articles_query_.step())
@@ -67,8 +70,9 @@ articles::iterator articles::get_all()
         a.short_title = all_articles_query_.at<std::string>(1);
         a.image = all_articles_query_.at<std::string>(2);
 
-        iterator_.articles.push_back(a);
+        iterator_->articles.push_back(a);
     }
 
-    return iterator_;
+    LuaIntf::CppFunctor::pushToStack(state, iterator_);
+    return 1;
 }

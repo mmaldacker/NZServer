@@ -19,10 +19,10 @@
 		    <legend>Edit</legend>
 
 		      <label for="title">Title</label>
-		      <input type="text" name="title" cols="60" value="]]}} {{a.title}} {{[[">
+		      <input type="text" name="title" cols="60" value="]].. a.title ..[[">
 
      		 <label for="content">Content</label>
-   		     <textarea name="content" cols="80" rows="20">]]}} {{a.content}} {{[[</textarea>
+   		     <textarea name="content" cols="80" rows="20">]].. a.content ..[[</textarea>
 
 		      <input type="submit" value="Edit" class="button">
 		  </fieldset>
@@ -30,8 +30,8 @@
 ]]}}
 {% else %}
 {{[[
-      <h2 class="h3 font-light">]]}} {{a.title}} {{[[</h2>
-      <p>]]}} {{a.content}} {{[[</p>
+      <h2 class="h3 font-light">]].. a.title ..[[</h2>
+      <p>]].. a.content ..[[</p>
 ]]}}
 {% end %}
     </div>

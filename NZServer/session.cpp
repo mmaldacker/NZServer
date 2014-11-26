@@ -25,7 +25,7 @@ session::session(LuaIntf::LuaContext & state)
     .endModule();
 }
 
-bool session::login(const std::string name, const std::string password)
+bool session::login(const std::string & name, const std::string & password)
 {
     auto uuid = boost::uuids::random_generator()();
     sessions_[name] = boost::lexical_cast<std::string>(uuid);
@@ -33,12 +33,12 @@ bool session::login(const std::string name, const std::string password)
     return true;
 }
 
-std::string session::get_session_cookie(const std::string name)
+std::string session::get_session_cookie(const std::string & name)
 {
     return "sid=" + sessions_[name] + "; path=/";
 }
 
-bool session::is_logged_in(const std::string cookie)
+bool session::is_logged_in(const std::string & cookie)
 {
     std::vector<std::string> pairs;
     boost::split(pairs,cookie,boost::is_any_of(";"));
