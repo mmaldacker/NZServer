@@ -29,6 +29,7 @@ public:
         std::string content;
     };
 
+    void add(const article & article_);
     void update(const article & article_);
     article get(const std::string & name);
 
@@ -49,6 +50,7 @@ private:
     query article_query_;
     query all_articles_query_;
     query article_update_;
+    query article_add_;
 };
 
 #endif /* defined(__NZServer__articles__) */
