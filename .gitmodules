@@ -1,3 +1,6 @@
 [submodule "lua-intf"]
 	path = lua-intf
 	url = https://github.com/SteveKChiu/lua-intf.git
+[submodule "http-parser"]
+	path = http-parser
+	url = https://github.com/nodejs/http-parser.git
