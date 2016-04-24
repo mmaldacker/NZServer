@@ -1,6 +1,3 @@
-[submodule "selene"]
-	path = selene
-	url = https://github.com/RizzlaPlus/Selene.git
 [submodule "lua-intf"]
 	path = lua-intf
 	url = https://github.com/SteveKChiu/lua-intf.git
