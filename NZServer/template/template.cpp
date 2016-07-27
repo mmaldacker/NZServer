@@ -19,7 +19,7 @@ template_engine::template_engine(LuaIntf::LuaContext & state, file_store & store
     std::function<void(int,const std::string)> gather_function = std::bind(&template_engine::gather, this, _1, _2);
     std::function<void(const std::string, const std::string)> set_header_function = std::bind(&template_engine::set_header, this, _1, _2);
 
-    LuaBinding(state_).beginModule("template_engine")
+    LuaIntf::LuaBinding(state_).beginModule("template_engine")
     .addFunction("display", gather_function)
     .addFunction("set_header", set_header_function)
     .endModule();

@@ -35,11 +35,4 @@ struct request
     }
 };
 
-inline std::ostream & operator<<(std::ostream & o, const request & req)
-{
-    o << "URI " << req.uri << " METHOD " << req.method;
-
-    return o;
-}
-
 #endif /* defined(__NZServer__request__) */

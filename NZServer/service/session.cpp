@@ -17,7 +17,7 @@
 
 session::session(LuaIntf::LuaContext & state)
 {
-    LuaBinding(state)
+    LuaIntf::LuaBinding(state)
     .beginModule("session")
     .addFunction("login", [&](const std::string & name, const std::string password) { return login(name, password); })
     .addFunction("get_session_cookie", [&](const std::string & name){ return get_session_cookie(name); })

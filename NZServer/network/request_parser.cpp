@@ -139,7 +139,7 @@ int request_parser::on_message_begin()
 
 int request_parser::on_message_complete()
 {
-    BOOST_LOG_TRIVIAL(info) << request_;
+    BOOST_LOG_TRIVIAL(info) << "URI " << request_.uri << " METHOD " << request_.method;
 
     result_type_ = result_type::good;
     return 0;

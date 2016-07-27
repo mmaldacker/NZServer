@@ -31,10 +31,7 @@ std::string deflate(const std::string & data)
 
         ret = deflate(&zs, Z_FINISH);
 
-        if (zs.avail_out != 0)
-        {
-            compressed_data.append(outbuffer, zs.avail_out);
-        }
+        compressed_data.append(outbuffer, sizeof(outbuffer) - zs.avail_out);
 
     }while (ret == Z_OK);
 
