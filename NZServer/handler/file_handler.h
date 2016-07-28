@@ -9,9 +9,9 @@
 #ifndef __NZServer__file_handler__
 #define __NZServer__file_handler__
 
-#include "request.h"
-#include "reply.h"
-#include "file_service.h"
+#include "network/request.h"
+#include "network/reply.h"
+#include "utils/file_service.h"
 
 class file_handler
 {

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
-#include "server.h"
+#include "network/server.h"
 
 int main(int argc, char* argv[])
 {

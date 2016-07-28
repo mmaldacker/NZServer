@@ -11,7 +11,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
-#include "utils.h"
+#include "utils/utils.h"
 
 template_engine::template_engine(LuaIntf::LuaContext & state, file_store & store) : state_(state), file_store_(store)
 {

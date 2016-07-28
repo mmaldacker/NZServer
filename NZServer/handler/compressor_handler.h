@@ -10,8 +10,8 @@
 #define __NZServer__compressor_handler__
 
 #include <zlib.h>
-#include "reply.h"
-#include "request.h"
+#include "network/reply.h"
+#include "network/request.h"
 
 class compressor_handler
 {

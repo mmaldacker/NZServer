@@ -10,10 +10,10 @@
 #define __NZServer__template__
 
 #define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
-#include "LuaIntf.h"
+#include "LuaIntf/LuaIntf.h"
 #include <vector>
-#include "file_service.h"
-#include "request.h"
+#include "utils/file_service.h"
+#include "network/request.h"
 
 struct template_structure
 {

@@ -9,15 +9,15 @@
 #ifndef __NZServer__template_handler__
 #define __NZServer__template_handler__
 
-#include "request.h"
-#include "reply.h"
+#include "network/request.h"
+#include "network/reply.h"
 #define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
-#include "LuaIntf.h"
-#include "database.h"
-#include "articles.h"
-#include "session.h"
-#include "template.h"
-#include "file_service.h"
+#include "LuaIntf/LuaIntf.h"
+#include "db/database.h"
+#include "service/articles.h"
+#include "service/session.h"
+#include "template/template.h"
+#include "utils/file_service.h"
 
 class template_handler
 {

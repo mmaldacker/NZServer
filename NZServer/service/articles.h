@@ -9,9 +9,9 @@
 #ifndef __NZServer__articles__
 #define __NZServer__articles__
 
-#include "database.h"
+#include "db/database.h"
 #define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
-#include "LuaIntf.h"
+#include "LuaIntf/LuaIntf.h"
 
 #include <vector>
 

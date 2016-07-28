@@ -10,7 +10,7 @@
 #define __NZServer__session__
 
 #define LUAINTF_LINK_LUA_COMPILED_IN_CXX 0
-#include "LuaIntf.h"
+#include "LuaIntf/LuaIntf.h"
 
 #include <map>
 

@@ -13,7 +13,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include "request_parser.h"
-#include "request_handler.h"
+#include "handler/request_handler.h"
 #include "reply.h"
 
 /// Represents a single connection from a client.

@@ -9,11 +9,11 @@
 #ifndef __NZServer__request_handler__
 #define __NZServer__request_handler__
 
-#include "request.h"
-#include "reply.h"
+#include "network/request.h"
+#include "network/reply.h"
 #include "file_handler.h"
 #include "template_handler.h"
-#include "file_service.h"
+#include "utils/file_service.h"
 #include "compressor_handler.h"
 
 class request_handler

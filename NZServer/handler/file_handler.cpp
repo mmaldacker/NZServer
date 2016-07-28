@@ -9,7 +9,7 @@
 #include "file_handler.h"
 #include <fstream>
 #include "mime_types.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 file_handler::file_handler(file_store & store) : file_store_(store)
 {
